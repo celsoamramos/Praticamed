@@ -3,5 +3,5 @@
    Cole somente a URL pública que o Formspree fornece em Integrations.
    Exemplo de formato: https://formspree.io/f/SEU_ID (não utilize este exemplo). */
 window.PRATICAMED_CONFIG = Object.freeze({
-  feedbackEndpoint: ''
+  feedbackEndpoint: 'https://formspree.io/f/xzerkywn'
 });
