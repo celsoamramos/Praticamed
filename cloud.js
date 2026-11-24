@@ -18,6 +18,8 @@
     message: '',
     user: null,
     profile: null,
+    lastSyncAt: null,
+    refreshing: false,
     _db: db,
     _loading: null,
     _loadingId: null,
@@ -72,6 +74,7 @@
       cm.user = user;
       cm.profile = profile;
       cm.status = 'signed_in';
+      cm.lastSyncAt = new Date().toISOString();
       cm.message = '';
       const mapped = {
         period: profile.period || 1,
@@ -96,7 +99,7 @@
     if (!db) {cm.status='error';cm.message='Biblioteca de conexão não carregou. Atualize a página.';render();return;}
     db.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {cm.status='recovery';cm.view='reset';render();return;}
-      if (event === 'SIGNED_OUT') {++cm._generation;cm.user=null;cm.profile=null;cm.status='signed_out';cm.view='login';window.pmCloudLoggedOut?.();render();return;}
+      if (event === 'SIGNED_OUT') {++cm._generation;cm.user=null;cm.profile=null;cm.lastSyncAt=null;cm.status='signed_out';cm.view='login';window.pmCloudLoggedOut?.();render();return;}
       if (event === 'SIGNED_IN' && session?.user?.id && cm.user?.id !== session.user.id) {
         Promise.resolve().then(() => loadUser(session.user));
       }
@@ -151,7 +154,7 @@
   };
   cm.logout = async () => {
     const {error}=await db.auth.signOut(); if(error) throw error;
-    ++cm._generation;cm.user=null;cm.profile=null;cm.status='signed_out';cm.view='login';window.pmCloudLoggedOut?.();render();
+    ++cm._generation;cm.user=null;cm.profile=null;cm.lastSyncAt=null;cm.status='signed_out';cm.view='login';window.pmCloudLoggedOut?.();render();
   };
   cm.forgot = async email => {
     const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:redirect()});
@@ -174,11 +177,20 @@
     const {error}=await db.from('pm_practice_records').insert({
       id:record.id,user_id:cm.user.id,skill_id:record.skillId,practice_date:record.date,
       context:record.context,role:record.role,result:record.result,supervision:record.supervision
-    }); if(error)throw error;
+    }); if(error)throw error;cm.lastSyncAt=new Date().toISOString();
+  };
+  cm.updateRecord = async record => {
+    if(!cm.user)throw Error('Entre na sua conta.');
+    const {data,error}=await db.from('pm_practice_records')
+      .update({practice_date:record.date,context:record.context,supervision:record.supervision,role:record.role,result:record.result})
+      .eq('user_id',cm.user.id).eq('id',record.id).select('id').maybeSingle();
+    if(error)throw error;
+    if(!data)throw Error('O registro não foi encontrado nesta conta. Atualize os dados antes de editar.');
+    cm.lastSyncAt=new Date().toISOString();
   };
   cm.removeRecord = async id => {
     if (!cm.user) throw Error('Entre na sua conta.');
-    const {error}=await db.from('pm_practice_records').delete().eq('user_id',cm.user.id).eq('id',id);if(error)throw error;
+    const {error}=await db.from('pm_practice_records').delete().eq('user_id',cm.user.id).eq('id',id);if(error)throw error;cm.lastSyncAt=new Date().toISOString();
   };
   cm.removeAllRecords = async () => {
     if (!cm.user) throw Error('Entre na sua conta.');
@@ -194,7 +206,13 @@
     }
   };
   cm.reload = async () => {
-    if(cm.user)await loadUser(cm.user);
+    if(!cm.user)throw Error('Entre na sua conta para atualizar os registros.');
+    cm.refreshing=true;
+    try {
+      await loadUser(cm.user);
+      if(cm.status !== 'signed_in')throw Error(cm.message || 'Não foi possível atualizar os registros.');
+      return true;
+    } finally {cm.refreshing=false;}
   };
   document.addEventListener('click', async event => {
     const sw=event.target.closest('[data-auth-view]');

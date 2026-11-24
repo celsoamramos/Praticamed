@@ -1,12 +1,11 @@
-# PráticaMed — Alterações do MVP 2.0
+# Histórico de versões
 
-- Cadastro de estudantes com e-mail, senha, nome de exibição opcional, instituição opcional e período.
-- Login, logout e recuperação de senha.
-- Perfis e registros por usuário, com políticas RLS no Supabase.
-- Conserva registro pelo `+`, gráficos, filtros e áreas de interesse múltiplas.
-- Preferências salvas na conta e disponíveis em outros dispositivos.
-- Exportação JSON/CSV e importação de registros locais, por ação expressa.
-- Integração Formspree preservada em `config.js` preexistente.
-- Compatibilidade com modo local caso Supabase ainda não esteja configurado.
-
-**Pendente:** configuração real do banco, do SMTP e validação de privacidade e segurança com contas reais.
+## 2.3.0 — 24/11/2026
+- Nova navegação: Validação e curvas.
+- Revisão documental das 45 habilidades, com fonte rastreável quando houver pesquisa específica.
+- Pontos publicados de curvas para intubação (3 pontos) e cateterização venosa (2 pontos); sem interpolação ou equivalência com metas.
+- Auditoria dos registros (datas, habilidades, ambiente, participação, desfechos e supervisão).
+- Evolução mostra proporção exploratória de sucesso/insucesso autodeclarado, somente com pelo menos 10 desfechos por ambiente; sem certificação.
+- Histórico: edição opcional de participação e resultado, sem exigir formulário na tela de registro rápido.
+- Mantidos todos os recursos da versão 2.2, login, RLS no banco, sugestões e preferências.
+- Nenhuma migração SQL obrigatória.
