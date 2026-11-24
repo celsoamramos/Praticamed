@@ -3,5 +3,5 @@
    Enquanto os campos estiverem vazios, o app 1.9 continua em modo local. */
 window.PRATICAMED_SUPABASE = Object.freeze({
   url: '',
-  publishableKey: ''
+  publishableKey: 'sb_publishable_OSeQ0nGXWCKKxLsWp8TFPg_FzGF7YPD'
 });
