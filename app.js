@@ -1,10 +1,10 @@
 'use strict';
-const NAV=[['home','⌂','Visão geral'],['library','▤','Biblioteca'],['register','＋','Registrar prática'],['charts','◫','Minha evolução'],['feedback','✉','Sugestões'],['settings','⚙','Preferências']];
+const NAV=[['home','⌂','Visão geral'],['library','▤','Biblioteca'],['register','＋','Registrar prática'],['charts','◫','Minha evolução'],['feedback','✉','Sugestões'],['settings','⚙','Preferências'],['account','♙','Minha conta']];
 const KEY='praticamed-prototipo-v1'; // preservado para manter registros anteriores
 function read(){let base={period:1,areas:[],records:[],typePreference:'ambos'};try{let p=JSON.parse(localStorage.getItem(KEY));if(p&&Array.isArray(p.records)&&Array.isArray(p.areas))return {...base,...p,typePreference:['ambos','manobra','procedimento'].includes(p.typePreference)?p.typePreference:'ambos',areas:p.areas.filter(a=>AREAS.includes(a))};}catch(e){}return base}
-let state=read(); let screen='home',selectedSkill=SKILLS[0].id,term='',areaFilters=[],typeFilter=state.typePreference,chartFilter='all';
-let quickTerm='',quickType=state.typePreference,quickContext='nao_informado',lastQuickId=null;
-function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){toast('Não foi possível salvar neste navegador.')}}
+let state=window.PMCloud?.enabled?{period:1,areas:[],records:[],typePreference:'ambos'}:read(); let screen='home',selectedSkill=SKILLS[0].id,term='',areaFilters=[],typeFilter=state.typePreference,chartFilter='all';
+let quickTerm='',quickType=state.typePreference,quickContext='nao_informado',lastQuickId=null,pendingQuick=false;
+function save(){if(window.PMCloud?.enabled)return;try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){toast('Não foi possível salvar neste navegador.')}}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function fDate(s){const [y,m,d]=String(s).split('-');return y&&m&&d?`${d}/${m}/${y}`:''}
 function tDate(){const n=new Date(), off=n.getTimezoneOffset();return new Date(n.getTime()-off*60000).toISOString().slice(0,10)}
@@ -51,15 +51,20 @@ function register(){
  </div><p class="tiny quick-note">Escolha o ambiente uma vez para os próximos toques, se quiser. "Paciente real supervisionado" declara que houve supervisão. Sem escolha, o ambiente fica como "não informado". Nenhum toque atribui sucesso, proficiência ou validação do preceptor.</p>
  <div class="quick-list-head"><h2>Minhas habilidades</h2><span class="tiny">${results.length} itens · toque em + para somar</span></div>
  <div class="quick-list">${results.length?results.map(s=>`<div class="quick-row"><div class="quick-name"><strong>${esc(s.name)}</strong><small>${esc(s.area)} · ${s.type==='manobra'?'Manobra':'Procedimento'}${interestScore(s)?' · ★ Área de interesse':''}</small></div><div class="quick-action"><span class="quick-count" aria-label="${counts(s.id).performed} execuções registradas">${counts(s.id).performed}</span><button class="quick-plus" type="button" data-quickadd="${s.id}" aria-label="Adicionar uma execução de ${esc(s.name)}" title="Somar 1 execução de ${esc(s.name)}">+</button></div></div>`).join(''):`<div class="empty">Nenhuma habilidade encontrada. Limpe a busca ou altere o filtro.</div>`}</div>
- </section><p class="hint">ⓘ Os registros continuam somente neste navegador. Não registre dados de pacientes. Contagem de execuções não equivale a competência técnica.</p>`;
+ </section><p class="hint">ⓘ ${window.PMCloud?.enabled?'Registros vinculados à sua conta, após confirmação no servidor.':'Registros somente neste navegador.'} Não registre dados de pacientes. Contagem não equivale a competência técnica.</p>`;
 }
-function quickAdd(id){
- const s=skill(id);if(!s)return;
+async function quickAdd(id){
+ const s=skill(id);if(!s||pendingQuick)return;
  const recordId=(typeof crypto!=='undefined'&&crypto.randomUUID)?crypto.randomUUID():'r'+Date.now()+'-'+Math.random().toString(36).slice(2);
  const context=quickContext;
- state.records.push({id:recordId,skillId:id,date:tDate(),context,role:'executei',result:'na',supervision:context==='real'?'sim':'na'});
- lastQuickId=recordId;selectedSkill=id;save();render();
- const x=document.querySelector('#toast');if(x){x.innerHTML=`<span>+1 em <b>${esc(s.name)}</b>. Registrado hoje.</span> <button type="button" class="toast-undo" data-undo-quick="${esc(recordId)}">Desfazer</button>`;x.classList.add('show');clearTimeout(toast._id);toast._id=setTimeout(()=>x.classList.remove('show'),6500)}
+ const rec={id:recordId,skillId:id,date:tDate(),context,role:'executei',result:'na',supervision:context==='real'?'sim':'na'};
+ pendingQuick=true;
+ try{
+  if(window.PMCloud?.enabled)await window.PMCloud.addRecord(rec);
+  state.records.push(rec);lastQuickId=recordId;selectedSkill=id;save();render();
+  const x=document.querySelector('#toast');if(x){x.innerHTML=`<span>+1 em <b>${esc(s.name)}</b>. ${window.PMCloud?.enabled?'Salvo na sua conta.':'Registrado neste navegador.'}</span> <button type="button" class="toast-undo" data-undo-quick="${esc(recordId)}">Desfazer</button>`;x.classList.add('show');clearTimeout(toast._id);toast._id=setTimeout(()=>x.classList.remove('show'),6500)}
+ }catch(err){toast('Não foi possível salvar a prática: '+String(err.message).slice(0,180))}
+ finally{pendingQuick=false;}
 }
 
 function drawChart(filter='all',small=false){const records=state.records.filter(r=>r.role==='executei'&&(filter==='all'||r.skillId===filter)).sort((a,b)=>a.date.localeCompare(b.date));if(!records.length)return `<div class="empty" style="padding:${small?'42px':'66px'} 20px">Ainda não existem execuções registradas.<br>Adicione uma prática para iniciar seu gráfico.</div>`;const byDay=new Map();for(const r of records){let v=byDay.get(r.date)||{date:r.date,sim:0,real:0,unknown:0};const key=r.context==='real'?'real':r.context==='simulacao'?'sim':'unknown';v[key]++;byDay.set(r.date,v)}const days=[...byDay.values()].sort((a,b)=>a.date.localeCompare(b.date));let cumSim=0,cumReal=0,cumUnknown=0;const values=days.map(d=>({date:d.date,sim:cumSim+=d.sim,real:cumReal+=d.real,unknown:cumUnknown+=d.unknown}));const w=640,h=260,l=46,right=17,top=18,bottom=40;let max=Math.max(2,...values.map(v=>v.sim+v.real+v.unknown));let x=i=>l+(w-l-right)*(values.length===1?.5:i/(values.length-1));let y=n=>top+(h-top-bottom)*(1-n/max);let line=key=>values.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+','+y(v[key]).toFixed(1)).join(' ');let total=values.map(v=>({...v,total:v.sim+v.real+v.unknown}));let totalLine=total.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+','+y(v.total).toFixed(1)).join(' ');const ticks=[0,.25,.5,.75,1].map(t=>{let yy=y(max*t).toFixed(1);return `<line x1="${l}" y1="${yy}" x2="${w-right}" y2="${yy}" stroke="#e3ecfa"/><text x="${l-9}" y="${+yy+4}" font-size="11" fill="#7588a2" text-anchor="end">${Math.round(max*t)}</text>`}).join('');return `<div class="chartbox"><svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Gráfico de execuções acumuladas entre ${fDate(days[0].date)} e ${fDate(days[days.length-1].date)}; total de ${records.length}"><g>${ticks}</g><path d="${totalLine}" stroke="#1769c2" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" fill="none"/><path d="${line('real')}" stroke="#6d9fde" stroke-width="2.5" stroke-linejoin="round" fill="none"/><circle cx="${x(values.length-1)}" cy="${y(total.at(-1).total)}" r="5" fill="#1769c2"/><text x="${l}" y="${h-13}" font-size="11" fill="#778ba4">${fDate(days[0].date)}</text><text x="${w-right}" y="${h-13}" font-size="11" text-anchor="end" fill="#778ba4">${fDate(days[days.length-1].date)}</text></svg><div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;font-size:11px;color:#607b99"><span><b style="color:#1769c2">━</b> Total executado</span><span><b style="color:#6d9fde">━</b> Paciente real</span><span>Sem ambiente informado: ${records.filter(r=>r.context!=='real'&&r.context!=='simulacao').length}</span></div></div>`}
@@ -71,7 +76,7 @@ function settings(){return head('Minhas preferências','Escolha o tipo de ativid
  <fieldset class="radiogrp"><legend>Tipo de atividade</legend><label class="checkchip"><input type="radio" name="typePreference" value="ambos" ${state.typePreference==='ambos'?'checked':''}>Ambos</label><label class="checkchip"><input type="radio" name="typePreference" value="manobra" ${state.typePreference==='manobra'?'checked':''}>Somente manobras</label><label class="checkchip"><input type="radio" name="typePreference" value="procedimento" ${state.typePreference==='procedimento'?'checked':''}>Somente procedimentos</label></fieldset>
  <h2 style="margin-top:25px">Minhas áreas de interesse</h2><p class="sub" style="margin-bottom:15px">Você pode marcar várias especialidades ao mesmo tempo. Elas destacam itens relacionados, mas não excluem outras áreas.</p><div class="checkbox-group">${AREAS.map(a=>`<label class="checkchip"><input type="checkbox" value="${esc(a)}" data-area="true" ${state.areas.includes(a)?'checked':''}>${esc(a)}</label>`).join('')}</div>
  <div class="form-actions"><button class="btn" id="saveprefs">Salvar preferências</button><button class="btn outline" data-nav="library">Ver biblioteca</button></div></section>
- <section class="card section" style="max-width:900px"><h2>Dados e privacidade do protótipo</h2><p class="sub" style="margin-top:9px">Esta versão salva os registros no armazenamento local do navegador, sem conta, servidor ou autenticação. Não utilize informações de pacientes nem interprete os dados como validação institucional. Uma versão de produção precisará de banco de dados protegido, login, política de privacidade, controles de acesso e revisão de conformidade com a LGPD.</p><div class="form-actions"><button class="btn secondary" id="backupjson">Baixar backup completo (JSON)</button><button class="btn outline" id="restorejson">Restaurar backup (JSON)</button><input type="file" id="restorefile" accept=".json,application/json" hidden><button class="btn outline" id="exportsettings">Exportar meus registros (CSV)</button><button class="btn outline" id="clearrecords" style="color:#a14a41;border-color:#e6cfc9">Apagar registros deste navegador</button></div><p class="tiny" style="margin-top:12px">O backup JSON inclui período, interesses e registros e pode ser importado após mudar de endereço. Guarde-o em local seguro. Restaurar substitui os dados atualmente salvos neste navegador.</p></section>`}
+ <section class="card section" style="max-width:900px"><h2>Dados e privacidade do protótipo</h2><p class="sub" style="margin-top:9px">${window.PMCloud?.enabled?'Seus registros são armazenados no Supabase com proteção por usuário (RLS). Não utilize dados de pacientes. Esta versão continua em avaliação e exige revisão de privacidade e segurança antes de uso amplo.':'Sem configuração de contas, esta versão ainda salva registros somente neste navegador. Antes do piloto com contas, configure o Supabase.'}</p><div class="form-actions"><button class="btn secondary" id="backupjson">Baixar backup completo (JSON)</button><button class="btn outline" id="restorejson">Restaurar backup (JSON)</button><input type="file" id="restorefile" accept=".json,application/json" hidden><button class="btn outline" id="exportsettings">Exportar meus registros (CSV)</button><button class="btn outline" id="clearrecords" style="color:#a14a41;border-color:#e6cfc9">${window.PMCloud?.enabled?'Apagar todos os registros da conta':'Apagar registros deste navegador'}</button></div><p class="tiny" style="margin-top:12px">O backup JSON inclui período, interesses e registros. Guarde-o em local seguro. ${window.PMCloud?.enabled?'Na conta, uma restauração mescla os registros do backup sem apagar os demais.':'No modo local, restaurar substitui os dados deste navegador.'}</p></section>`}
 function feedback(){
  const endpoint=String(window.PRATICAMED_CONFIG?.feedbackEndpoint||'').trim();
  const enabled=/^https:\/\/formspree\.io\/f\/[A-Za-z0-9]+$/.test(endpoint);
@@ -89,7 +94,38 @@ function feedback(){
  <aside class="card feedback-side"><h2>O que queremos melhorar?</h2><p class="sub">Seu feedback ajuda a priorizar melhorias reais.</p><div class="feedback-tip"><b>01 · Biblioteca</b><span>Novas manobras e procedimentos relevantes à graduação.</span></div><div class="feedback-tip"><b>02 · Registro</b><span>Menos etapas para registrar uma prática.</span></div><div class="feedback-tip"><b>03 · Evolução</b><span>Gráficos claros e indicadores científicos adequados.</span></div><div class="feedback-tip"><b>04 · Uso no celular</b><span>Navegação, acessibilidade e organização das áreas de interesse.</span></div><div class="info" style="margin-top:22px">A pesquisa é voluntária. Para proteger a privacidade, não envie dados de pacientes, prontuários, nomes ou informações sensíveis. O e-mail é opcional e destinado apenas a eventual resposta. Quando configurado, o formulário utiliza o Formspree, um serviço externo.</div></aside></section>`;
 }
 
-function render(){showNav();const views={home,library,register,charts,feedback,settings};document.querySelector('#view').innerHTML=views[screen]();}
+
+function account(){
+ const c=window.PMCloud;
+ if(!c?.enabled)return head('Minha conta','Cadastro de estudantes')+`<section class="card account-card"><h2>Cadastro ainda não ativado</h2><p class="sub">O aplicativo segue em modo local. Para habilitar cadastro e sincronização, configure supabase-config.js e execute o banco de dados do pacote 2.0.</p><div class="info">Antes de ativar, faça backup dos registros em Preferências.</div></section>`;
+ return head('Minha conta','Seus dados pessoais e registros vinculados à sua autenticação.')+
+ `<section class="card account-card"><div class="eyebrow">Conta autenticada</div><h2>${esc(c.profile?.display_name||'Estudante')}</h2><p class="sub">${esc(c.user?.email||'E-mail indisponível')}</p>${c.profile?.institution?`<p class="sub">Faculdade: ${esc(c.profile.institution)}</p>`:''}
+ <div class="form-actions"><button class="btn outline" id="pm-logout">Sair da minha conta</button><button class="btn secondary" data-nav="settings">Editar preferências</button></div>
+ <hr style="border:0;border-top:1px solid #dce8f6;margin:25px 0"><h2>Trazer registros da versão antiga</h2>
+ <p class="sub">Se você já usava o PráticaMed antes do login, pode importar as práticas deste navegador para sua conta. Confirme que elas são suas antes de importar. Os dados locais originais não serão apagados.</p>
+ <div class="form-actions"><button class="btn secondary" id="pm-migrate-legacy">Importar registros antigos deste navegador</button><button class="btn outline" id="backupjson">Baixar backup da minha conta</button></div>
+ <p class="tiny" style="margin-top:14px">As contas não permitem visualizar práticas de outros estudantes. Uma conta registrada não equivale a validação das práticas por preceptor.</p></section>`;
+}
+async function migrateLegacy(){
+ const c=window.PMCloud;
+ if(!c?.enabled||c.status!=='signed_in')return;
+ let backup=read(),rows=backup.records.filter(r=>r&&skill(r.skillId)&&typeof r.id==='string'&&/^[A-Za-z0-9_-]{1,100}$/.test(r.id)&&/^\d{4}-\d{2}-\d{2}$/.test(r.date)&&['simulacao','real','nao_informado'].includes(r.context)&&['executei','observei','auxiliei'].includes(r.role)&&['na','sucesso','insucesso','adequada','melhorar'].includes(r.result)&&['sim','na'].includes(r.supervision));
+ if(!rows.length){toast('Não há registros locais antigos para importar.');return;}
+ if(!confirm(`Importar ${rows.length} práticas deste navegador para a conta ${c.user.email}? Importe apenas registros que são seus; dados de outros usuários deste dispositivo não devem ser importados.`))return;
+ try{await c.mergeRecords(rows);await c.reload();toast('Registros antigos importados para sua conta.');}
+ catch(err){toast('Não foi possível concluir a importação: '+err.message+'. Verifique sua conta antes de repetir.');}
+}
+function render(){
+ if(window.PMCloud?.enabled&&window.PMCloud.status!=='signed_in'){
+  document.getElementById('desktop-nav').innerHTML='';document.getElementById('mobile-nav').innerHTML='';
+  document.querySelector('#view').innerHTML=window.PMCloud.screen();return;
+ }
+ showNav();const views={home,library,register,charts,feedback,settings,account};document.querySelector('#view').innerHTML=views[screen]();
+}
+window.pmRender=render;
+window.pmToast=toast;
+window.pmCloudLoaded=(data)=>{state={period:data.period||1,areas:(data.areas||[]).filter(a=>AREAS.includes(a)),typePreference:['ambos','manobra','procedimento'].includes(data.typePreference)?data.typePreference:'ambos',records:data.records||[]};typeFilter=state.typePreference;quickType=state.typePreference;areaFilters=[];lastQuickId=null;screen='home';render();};
+window.pmCloudLoggedOut=()=>{state={period:1,areas:[],typePreference:'ambos',records:[]};screen='home';lastQuickId=null;render();};
 function csvExport(){if(!state.records.length){toast('Não há registros para exportar.');return}const cols=['data','habilidade','area','tipo','ambiente','participacao','resultado','supervisao','status'];let csv=[cols.join(';'),...state.records.map(r=>{let s=skill(r.skillId);let vals=[r.date,s?.name||'',s?.area||'',s?.type||'',r.context,r.role,r.result,r.supervision,'Autodeclarado'];return vals.map(x=>'"'+String(x??'').replace(/"/g,'""')+'"').join(';')})].join('\r\n');let url=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='praticamed-registros.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);toast('Arquivo CSV exportado.')}
 function downloadJsonBackup(){
  const payload={format:'praticamed-backup',schemaVersion:1,exportedAt:new Date().toISOString(),data:{period:state.period,areas:state.areas,typePreference:state.typePreference,records:state.records}};
@@ -114,18 +150,25 @@ async function importJsonBackup(file){
    return ['simulacao','real','nao_informado'].includes(r.context)&&['observei','auxiliei','executei'].includes(r.role)&&['sucesso','insucesso','adequada','melhorar','na'].includes(r.result)&&['sim','na'].includes(r.supervision);
   });
   if(!validRecords)throw Error('Registros do backup inválidos ou incompatíveis.');
-  if(!confirm(`Restaurar ${data.records.length} registros? Esta operação substituirá os dados salvos neste navegador. Faça antes um backup da versão atual se necessário.`))return;
+  if(!confirm(`${window.PMCloud?.enabled?'Mesclar':'Restaurar'} ${data.records.length} registros? ${window.PMCloud?.enabled?'Os registros já existentes na conta serão mantidos.':'Esta operação substituirá os dados salvos neste navegador.'} Faça antes um backup, se necessário.`))return;
   const restored={period:data.period,areas:[...new Set(data.areas)],typePreference:data.typePreference,records:data.records.map(r=>({id:r.id,skillId:r.skillId,date:r.date,context:r.context,role:r.role,result:r.result,supervision:r.supervision}))};
-  localStorage.setItem(KEY,JSON.stringify(restored));state=restored;typeFilter=restored.typePreference;areaFilters=[];chartFilter='all';go('home');toast('Backup restaurado neste navegador.');
+  if(window.PMCloud?.enabled){
+   await window.PMCloud.mergeRecords(restored.records);
+   await window.PMCloud.saveProfile(restored);
+   await window.PMCloud.reload();go('home');toast('Registros do backup mesclados à sua conta.');
+  }else{localStorage.setItem(KEY,JSON.stringify(restored));state=restored;typeFilter=restored.typePreference;areaFilters=[];chartFilter='all';go('home');toast('Backup restaurado neste navegador.');}
  }catch(error){toast('Não foi possível restaurar: '+error.message)}
 }
-document.addEventListener('click',e=>{const quick=e.target.closest('[data-quickadd]');if(quick){quickAdd(quick.dataset.quickadd);return}const undo=e.target.closest('[data-undo-quick]');if(undo){if(undo.dataset.undoQuick===lastQuickId){state.records=state.records.filter(r=>r.id!==lastQuickId);lastQuickId=null;save();render();toast('Último registro rápido desfeito.')}return}const nav=e.target.closest('[data-nav]');if(nav){go(nav.dataset.nav);return}const select=e.target.closest('[data-skill]');if(select){selectedSkill=select.dataset.skill;render();return}const rec=e.target.closest('[data-record]');if(rec){selectedSkill=rec.dataset.record;go('register');return}const chart=e.target.closest('[data-chart]');if(chart){chartFilter=chart.dataset.chart;go('charts');return}if(e.target.id==='saveprefs'){state.period=+document.getElementById('period').value;state.areas=[...document.querySelectorAll('[data-area]:checked')].map(x=>x.value);state.typePreference=document.querySelector('[name=typePreference]:checked').value;typeFilter=state.typePreference;quickType=state.typePreference;areaFilters=[];save();toast('Preferências salvas.');go('home');return}if(e.target.id==='feedbackcopy'){
+document.addEventListener('click',async e=>{const quick=e.target.closest('[data-quickadd]');if(quick){quickAdd(quick.dataset.quickadd);return}const undo=e.target.closest('[data-undo-quick]');if(undo){if(undo.dataset.undoQuick===lastQuickId){try{if(window.PMCloud?.enabled)await window.PMCloud.removeRecord(lastQuickId);state.records=state.records.filter(r=>r.id!==lastQuickId);lastQuickId=null;save();render();toast('Último registro rápido desfeito.')}catch(err){toast('Não foi possível desfazer: '+err.message)}}return}const nav=e.target.closest('[data-nav]');if(nav){go(nav.dataset.nav);return}const select=e.target.closest('[data-skill]');if(select){selectedSkill=select.dataset.skill;render();return}const rec=e.target.closest('[data-record]');if(rec){selectedSkill=rec.dataset.record;go('register');return}const chart=e.target.closest('[data-chart]');if(chart){chartFilter=chart.dataset.chart;go('charts');return}if(e.target.id==='saveprefs'){
+ const prefs={period:+document.getElementById('period').value,areas:[...document.querySelectorAll('[data-area]:checked')].map(x=>x.value),typePreference:document.querySelector('[name=typePreference]:checked').value};
+ try{if(window.PMCloud?.enabled)await window.PMCloud.saveProfile(prefs);Object.assign(state,prefs);typeFilter=state.typePreference;quickType=state.typePreference;areaFilters=[];save();toast('Preferências salvas.');go('home');}catch(err){toast('Não foi possível salvar preferências: '+err.message)}return;}
+ if(e.target.id==='pm-migrate-legacy'){await migrateLegacy();return;}if(e.target.id==='feedbackcopy'){
  const msg=document.getElementById('feedbackmessage')?.value?.trim()||'';
  if(msg.length<15){toast('Escreva uma sugestão com pelo menos 15 caracteres.');return}
  const txt='PráticaMed — Sugestão ('+(document.getElementById('feedbackcategory')?.value||'Geral')+')\n'+msg;
  if(navigator.clipboard?.writeText){navigator.clipboard.writeText(txt).then(()=>toast('Sugestão copiada.')).catch(()=>toast('Não foi possível copiar; selecione o texto manualmente.'))}
  else {const el=document.getElementById('feedbackmessage');el.focus();el.select();toast('Texto selecionado. Use Ctrl+C ou Copiar.')}return;
-}if(e.target.id==='backupjson'){downloadJsonBackup();return}if(e.target.id==='restorejson'){document.getElementById('restorefile')?.click();return}if(e.target.id==='export'||e.target.id==='exportsettings'){csvExport();return}if(e.target.id==='resetfilters'){typeFilter='ambos';areaFilters=[];term='';render();return}if(e.target.id==='clearareas'){areaFilters=[];render();return}const del=e.target.closest('[data-del]');if(del){if(confirm('Excluir este registro do protótipo?')){state.records=state.records.filter(r=>r.id!==del.dataset.del);save();render();toast('Registro excluído.')}return}if(e.target.id==='clearrecords'){if(confirm('Deseja apagar permanentemente TODOS os registros salvos neste navegador?')){state.records=[];save();render();toast('Registros deste navegador apagados.')}}});
+}if(e.target.id==='backupjson'){downloadJsonBackup();return}if(e.target.id==='restorejson'){document.getElementById('restorefile')?.click();return}if(e.target.id==='export'||e.target.id==='exportsettings'){csvExport();return}if(e.target.id==='resetfilters'){typeFilter='ambos';areaFilters=[];term='';render();return}if(e.target.id==='clearareas'){areaFilters=[];render();return}const del=e.target.closest('[data-del]');if(del){if(confirm('Excluir esta prática?')){try{if(window.PMCloud?.enabled)await window.PMCloud.removeRecord(del.dataset.del);state.records=state.records.filter(r=>r.id!==del.dataset.del);save();render();toast('Registro excluído.')}catch(err){toast('Falha ao excluir: '+err.message)}}return}if(e.target.id==='clearrecords'){if(confirm(window.PMCloud?.enabled?'Apagar definitivamente TODOS os registros da sua conta? Essa ação não pode ser desfeita.':'Deseja apagar permanentemente TODOS os registros salvos neste navegador?')){try{if(window.PMCloud?.enabled)await window.PMCloud.removeAllRecords();state.records=[];save();render();toast('Registros apagados.')}catch(err){toast('Falha ao apagar: '+err.message)}}}});
 document.addEventListener('change',e=>{if(e.target.id==='restorefile'){const f=e.target.files?.[0];if(f)importJsonBackup(f);e.target.value='';return}if(e.target.matches('[data-filterarea]')){areaFilters=[...document.querySelectorAll('[data-filterarea]:checked')].map(x=>x.value);render()}if(e.target.id==='type-filter'){typeFilter=e.target.value;render()}if(e.target.id==='chart-filter'){chartFilter=e.target.value;render()}if(e.target.id==='quick-type'){quickType=e.target.value;render()}if(e.target.id==='quick-context'){quickContext=e.target.value;render()}});
 document.addEventListener('input',e=>{if(e.target.id==='search'||e.target.id==='quick-search'){const isQuick=e.target.id==='quick-search';if(isQuick)quickTerm=e.target.value;else term=e.target.value;const pos=e.target.selectionStart;render();const input=document.getElementById(isQuick?'quick-search':'search');input.focus();input.setSelectionRange(pos,pos)}});
 document.addEventListener('keydown',e=>{const item=e.target.closest('[data-skill]');if(item&&!e.target.closest('button')&&(e.key==='Enter'||e.key===' ')){e.preventDefault();selectedSkill=item.dataset.skill;render()}});
@@ -144,7 +187,7 @@ document.addEventListener('submit',async e=>{
  const payload=new FormData(form);
  payload.set('mensagem',msg);
  payload.set('periodo_academico',String(state.period));
- payload.set('versao_aplicativo','1.8.0');
+ payload.set('versao_aplicativo','2.0.0');
  btn.disabled=true;btn.textContent='Enviando…';status.textContent='Enviando sua sugestão…';
  try{
   const response=await fetch(endpoint,{method:'POST',body:payload,headers:{'Accept':'application/json'}});
@@ -153,4 +196,4 @@ document.addEventListener('submit',async e=>{
  }catch(error){status.textContent='Não foi possível confirmar o envio. Sua mensagem continua no campo; tente novamente. ('+error.message+')';status.className='feedback-status offline';}
  finally{btn.disabled=false;btn.textContent='Enviar sugestão';}
 });
-render();
+if(window.PMCloud?.enabled){render();window.PMCloud.boot();}else render();

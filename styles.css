@@ -45,3 +45,8 @@ html{background:#f6f9fe}
 .btn,.quick-plus{transition:background .12s ease,transform .12s ease}
 .quick-plus:hover,.btn:hover{filter:brightness(.96)}
 @media(max-width:950px){.mobilebar{background:#123b70}}
+
+
+/* PráticaMed 2.0 — Login e cadastro */
+.auth-layout{min-height:65vh;display:grid;place-items:center;padding:22px 0}.auth-card{width:100%;max-width:530px;padding:32px}.auth-card h1{font-size:28px;letter-spacing:-.8px;margin:9px 0}.auth-form{display:grid;gap:15px;margin-top:23px}.auth-switch{font-size:13px;color:var(--muted);margin:17px 0 0}.auth-switch button{border:0;background:transparent;color:var(--mint);font-weight:750;text-decoration:underline;padding:0}.auth-message:not(:empty){background:#eaf3ff;border-radius:10px;color:#144d88;font-size:13px;line-height:1.55;padding:12px;margin-top:19px}.auth-privacy{font-size:12px;line-height:1.5;color:var(--muted);background:#f4f8fe;padding:14px;border-radius:10px;margin-top:24px}.auth-privacy p{margin:7px 0 0}.auth-confirm{font-size:12px;display:flex;gap:10px;align-items:start;line-height:1.55}.auth-confirm input{accent-color:var(--mint);width:17px;height:17px;margin-top:2px}.account-card{max-width:820px}.account-card h2{margin:7px 0}.mobilebar{overflow-x:auto;scrollbar-width:none;justify-content:space-between}.mobilebar::-webkit-scrollbar{display:none}.mobilebar button{flex:1 0 auto}.auth-card .field{width:100%}
+@media(max-width:560px){.auth-layout{padding:0}.auth-card{padding:22px 17px}.auth-card h1{font-size:25px}.mobilebar button{font-size:9px;min-width:45px;padding:6px 2px}.mobilebar .ico{font-size:18px}}
