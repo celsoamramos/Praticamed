@@ -1,22 +1,21 @@
-# PráticaMed MVP 1.8 — Registro com +
+# PráticaMed MVP 1.9 — Identidade azul e branca
+
+Atualização visual sobre o MVP 1.8, sem alteração no formato de dados, na biblioteca ou no envio de sugestões.
 
 ## O que mudou
-- Tela Registrar prática: lista de habilidades com botão + ao lado de cada item.
-- Cada toque no + adiciona **uma execução autodeclarada** com data atual.
-- Campo opcional de ambiente é configurado uma vez para os toques seguintes. Por padrão: não informado.
-- Desfazer o último toque em até alguns segundos.
-- Filtros Ambos, Manobras, Procedimentos; pesquisa; áreas de interesse continuam funcionando.
-- Gráficos, CSV e backup distinguem ambiente não informado de simulação ou paciente real.
-- Mantém a chave de armazenamento antigo `praticamed-prototipo-v1`, sem apagar registros anteriores.
-- Não registra sucesso, competência, detalhes de paciente nem validação de preceptores.
+- Barra lateral e navegação inferior em azul-marinho.
+- Botão **+**, links, destaques, estados selecionados e gráficos em tons de azul.
+- Páginas e cartões brancos, fundo azul muito claro.
+- Arquivo `index.html` com identificação da versão 1.9 e cor da barra de navegador atualizada.
+- Preservados todos os IDs, `localStorage`, formatos de registros, filtros, sugestões e modo de registro rápido.
 
-## Publicação no seu repositório existente
-1. Faça backup dos dados em Preferências.
-2. Descompacte este ZIP.
-3. Em https://github.com/celsoamramos/Praticamed, use Add file > Upload files.
-4. Envie **index.html, app.js e styles.css** para a **raiz** do repositório. Substitua os arquivos existentes (Commit changes).
-5. Não substitua seu `config.js` (Formspree) nem `catalogo.js`; eles permanecem no GitHub.
-6. Após a publicação, abra https://celsoamramos.github.io/Praticamed/ e pressione Ctrl+Shift+R.
-7. Teste +, Desfazer, Minha evolução, filtros e backup.
+## Publicar no GitHub existente
+1. Entre no PráticaMed atual e faça **backup em Preferências** antes de publicar.
+2. Abra o seu repositório `celsoamramos/Praticamed` no GitHub.
+3. Se os arquivos atuais estão na **raiz** (como nas capturas de tela anteriores), faça upload para a raiz dos três arquivos deste ZIP: `index.html`, `app.js`, `styles.css`. Substitua os arquivos homônimos.
+4. **Não substitua** `config.js` (ele contém a ligação ao Formspree) nem `catalogo.js`.
+5. Clique em **Commit changes**. A publicação seguirá o mesmo endereço do GitHub Pages.
+6. Visite `https://celsoamramos.github.io/Praticamed/`, pressione **Ctrl + Shift + R** e verifique o visual azul.
+7. Teste a seleção de múltiplas áreas, filtros, botão **+**, **Desfazer**, gráficos e o envio de uma sugestão de teste.
 
-**Esta versão mantém arquivos na raiz** porque essa é a organização do repositório atualmente publicado. Não os coloque na pasta assets.
+> Nota: este ZIP é um pacote de **atualização**, não um projeto completo. Usa `config.js` e `catalogo.js` que já existem no GitHub. Não coloque senhas nem dados de pacientes no repositório ou no aplicativo.
