@@ -129,3 +129,33 @@ html{background:#f6f9fe}
 .pm24-goal{padding:14px;border:1px solid #c9ddf4;background:#f5faff;border-radius:12px;display:grid;gap:7px}
 .pm24-goal small{color:#566f90}.pm24-track{height:9px;background:#dbeafc;border-radius:9px;overflow:hidden}.pm24-fill{height:100%;background:#1769c2;border-radius:9px}
 @media(max-width:850px){.pm24-panels{grid-template-columns:1fr}}
+
+
+/* PráticaMed 2.5 — Janela rápida de prática em duas escolhas */
+body.pm-quick-open{overflow:hidden}
+.pm-quick-backdrop{z-index:60;overscroll-behavior:contain}
+.pm-quick-dialog{width:min(100%,520px);padding:24px;max-height:min(94vh,790px);overflow:auto}
+.pm-quick-dialog .card-top{align-items:flex-start}
+.pm-quick-dialog .card-top h2{font-size:21px;line-height:1.35;margin:5px 0 0}
+.pm-choice-group{border:0;margin:20px 0 0;padding:0;min-width:0}
+.pm-choice-group legend{font-size:14px;font-weight:750;color:#123b70;margin-bottom:11px}
+.pm-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.pm-choice{cursor:pointer;display:flex;align-items:stretch;min-width:0;position:relative}
+.pm-choice input{position:absolute;opacity:0;width:1px;height:1px}
+.pm-choice span{display:flex;flex-direction:column;gap:4px;flex:1;padding:14px 11px;border:2px solid #d8e6f5;background:#f8fbff;border-radius:12px;min-height:76px;transition:border-color .12s ease, background .12s ease,box-shadow .12s ease}
+.pm-choice b{font-size:14px;color:#123b70}
+.pm-choice small{font-size:11px;line-height:1.4;color:#617b98}
+.pm-choice input:checked+span{border-color:#1769c2;background:#eaf3ff;box-shadow:0 0 0 1px #1769c23b}
+.pm-choice input:focus-visible+span{outline:3px solid #80b8fa;outline-offset:2px}
+.pm-choice-secondary{margin-top:9px}
+.pm-choice-secondary span{min-height:0;padding:9px 12px;flex-direction:row;gap:10px;align-items:center}
+.pm-choice-secondary small{margin-left:auto;text-align:right}
+.pm-quick-caveat{margin:18px 0 0;line-height:1.6;color:#617b98}
+.pm-quick-actions{display:flex;gap:9px;margin-top:16px}
+.pm-quick-actions .btn{min-height:45px}
+.pm-quick-error{font-size:12px;color:#a22d39;min-height:0;margin:8px 0 0}
+.pm-quick-error:empty{display:none}
+@media(max-width:560px){.pm-quick-backdrop{align-items:end;padding:0}.pm-quick-dialog{border-radius:20px 20px 0 0;width:100%;padding:20px 17px 25px;max-height:92dvh}.pm-choice span{min-height:72px}.pm-quick-actions .btn{flex:1}.pm-choice-secondary small{font-size:10px}}
+/* Ajuste do painel de busca: o ambiente agora é escolhido dentro da janela do +. */
+.quick-controls{grid-template-columns:minmax(220px,1.5fr) minmax(160px,.6fr)}
+@media(max-width:700px){.quick-controls{grid-template-columns:1fr}.quick-controls>.formfield:first-child{grid-column:auto}}
