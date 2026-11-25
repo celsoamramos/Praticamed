@@ -120,3 +120,12 @@ html{background:#f6f9fe}
 .performance-tile strong{font-size:13px}.performance-tile b{font-size:17px;color:#1769c2}.performance-tile small{font-size:11px;color:#607895}
 @media(max-width:950px){.review-layout{grid-template-columns:1fr}.mobilebar{overflow-x:auto;justify-content:flex-start;gap:6px;scrollbar-width:thin}.mobilebar button{flex:0 0 66px;min-width:66px}.audit-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:560px){.audit-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.performance-grid{grid-template-columns:1fr}.review-layout .searchrow{display:grid}.review-layout .searchbox{min-width:0;flex:auto}.audit-row{align-items:flex-start;flex-direction:column}}
+
+/* Versão 2.4: curva individual e metas com status científico */
+.pm24-panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:12px}
+.pm24-panels>div{min-width:0;background:#f6faff;border:1px solid #dce7f6;border-radius:16px;padding:14px}
+.pm24-panels h3{margin:0 0 12px;font-size:15px;color:#123b70}
+.pm24-learning h3{margin:14px 0 10px;color:#123b70;font-size:16px}
+.pm24-goal{padding:14px;border:1px solid #c9ddf4;background:#f5faff;border-radius:12px;display:grid;gap:7px}
+.pm24-goal small{color:#566f90}.pm24-track{height:9px;background:#dbeafc;border-radius:9px;overflow:hidden}.pm24-fill{height:100%;background:#1769c2;border-radius:9px}
+@media(max-width:850px){.pm24-panels{grid-template-columns:1fr}}

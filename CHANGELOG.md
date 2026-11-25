@@ -9,3 +9,9 @@
 - Histórico: edição opcional de participação e resultado, sem exigir formulário na tela de registro rápido.
 - Mantidos todos os recursos da versão 2.2, login, RLS no banco, sugestões e preferências.
 - Nenhuma migração SQL obrigatória.
+
+
+## MVP 2.4
+- Curva individual de desempenho autodeclarado por data e ambiente quando houver dados.
+- Cadastro seguro e inicialmente vazio de metas para posterior validação acadêmica.
+- CSV da matriz das 45 habilidades para validação docente.

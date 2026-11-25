@@ -1,0 +1,46 @@
+﻿skill_id;habilidade;tipo_meta;numero_minimo;unidade;ambiente;fonte;situacao;aprovado_por;data_aprovacao;observacao
+h01;Teste de Romberg;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h02;Teste de Lasègue (elevação da perna estendida);;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h03;Pesquisa do sinal de Babinski;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h04;Pesquisa de reflexos osteotendíneos;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h05;Prova dedo-nariz;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h06;Pesquisa do reflexo fotomotor pupilar;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h07;Teste de força muscular segmentar;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h08;Ausculta cardíaca;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h09;Palpação de pulsos periféricos;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h10;Aferição da pressão arterial;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h11;Estimativa clínica da pressão venosa jugular;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h12;Ausculta pulmonar;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h13;Percussão torácica;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h14;Avaliação da expansibilidade torácica;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h15;Pesquisa do frêmito toracovocal;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h16;Pesquisa do sinal de Murphy;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h17;Pesquisa de dor à descompressão abdominal (Blumberg);;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h18;Pesquisa do sinal de Rovsing;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h19;Punho-percussão lombar (sinal de Giordano);;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h20;Pesquisa de macicez móvel à percussão abdominal;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h21;Teste de Lachman;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h22;Teste de McMurray;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h23;Teste de Phalen;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h24;Pesquisa do sinal de Tinel;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h25;Teste de Neer;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h26;Manobras de Leopold;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h27;Mensuração da altura uterina;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h28;Ausculta dos batimentos cardíacos fetais;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h29;Exame ginecológico com espéculo;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h30;Pesquisa de reflexos primitivos no lactente;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h31;Aferição de sinais vitais pediátricos;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h32;Otoscopia;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h33;Sutura simples;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h34;Retirada de pontos de sutura;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h35;Curativo de ferida simples;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h36;Preparo antisséptico do campo operatório;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h37;Ressuscitação cardiopulmonar (RCP);;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h38;Ventilação com bolsa-válvula-máscara;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h39;Intubação orotraqueal;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h40;Estabilização cervical em trauma;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h41;Acesso venoso periférico;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h42;Sondagem vesical;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h43;Punção arterial;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h44;Sondagem nasogástrica;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
+h45;Mensuração de glicemia capilar por punção digital;;;;;;pendente de validação docente;;;Não transformar observação de pesquisa em mínimo curricular
